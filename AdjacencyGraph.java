@@ -38,13 +38,13 @@ public class AdjacencyGraph {
             Vertex minVertex = Q.extractMin();
             VertexInMST.add(minVertex);
             MST += minVertex.distance;
-            for (Edge outEdge: minVertex.OutEdges) {
-                if(!VertexInMST.contains(outEdge.to)  && outEdge.weight < outEdge.to.distance)
+            for (Edge outEdge: minVertex.OutEdges) {            // what are there of outedges
+                if(!VertexInMST.contains(outEdge.to)  && outEdge.weight < outEdge.to.distance)  // tjekker om det allerede er taget, && tjekker om en af dem er mindre end distancen
                 {
                     outEdge.to.distance = outEdge.weight;
-                    outEdge.to.prev = minVertex;
+                    outEdge.to.prev = minVertex;                // sætter den sidste som minVertex
                     int pos = Q.getPosition(outEdge.to);
-                    Q.decreasekey(pos);
+                    Q.decreasekey(pos);                         // updates min heap
                 }
             }
         }
@@ -68,8 +68,8 @@ public class AdjacencyGraph {
 class Vertex implements Comparable<Vertex>{
     String name;
     ArrayList<Edge> OutEdges;
-    Integer distance = Integer.MAX_VALUE;
-    Vertex prev = null;                     // Added null
+    Integer distance = Integer.MAX_VALUE;       // ved ikke hvad vertex value er så sætter det bare til max_value
+    Vertex prev = null;                         // når fundet korteste rute bliver prev vertex null
     public Vertex(String id){
         name=id;
         OutEdges=new ArrayList<Edge>();
@@ -91,18 +91,5 @@ class Edge{
         this.to=to;
         this.weight=cost;
         this.from.addOutEdge(this);
-    }
-}
-// This class ties the distance with index so they can be compared
-class Pair implements Comparable<Pair> {
-    Integer distance;
-    Integer index;
-    public Pair(Integer distance, Integer index) {
-        this.distance=distance;
-        this.index=index;
-    }
-    @Override
-    public int compareTo(Pair p) {
-        return this.distance.compareTo(p.distance);
     }
 }
