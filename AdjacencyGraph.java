@@ -1,8 +1,4 @@
-import java.io.OptionalDataException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 public class AdjacencyGraph {
     ArrayList<Vertex> vertices;
