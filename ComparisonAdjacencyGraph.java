@@ -1,15 +1,13 @@
-import java.io.OptionalDataException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class AdjacencyGraph {
     ArrayList<Vertex> vertices;
 
     public AdjacencyGraph(){
-        vertices=new ArrayList<Vertex>();
+        vertices=new ArrayList<Vertex>();       // initiere konstruktor
     }
 
-    public void addVertex(Vertex v){
+    public void addVertex(Vertex v){            // putter vertex ind i arraylist
         vertices.add(v);
     }
     public void addEdge(Vertex f,Vertex t, Integer w){          // from,to,weight
@@ -22,41 +20,40 @@ public class AdjacencyGraph {
         Edge Edge1=new Edge(t,f,w);
     }
     public void MSTPrims()  {
-        //Setup for the algorithm
-        int[] Distance =new int[AdjacencyGraph.length]; //slet
-        int[] Predecessor = new int[AdjacencyGraph.length]; //slet
-        MinHeap<Pair> Q = new MinHeap<>();                          // Adjacency doesn't want pair, but do not know what is supposed to be instead.
-        ArrayList<Pair> VertexPairs=new ArrayList<>();              // Not sure if this should be deleted in connection with making my own pair in MinHeap.java (line 31)
-        if(AdjacencyGraph.size>0)    
-            Distance[0]=0;
-        for(int i=0;i<AdjacencyGraph.length;i++)
-            VertexPairs.add(new Pair(Distance[i],i));
-        int i = 0;
-        Q.Insert(VertexPairs.get(i));
+        MinHeap<Vertex> Q = new MinHeap<>();            // create minheap (other doesnt exists)
+        ArrayList<Vertex> VertexInMST = new ArrayList<>();  // liste over brugte byer            
+        if(vertices.size()>0)                               // test, om der mangler nogle byer (hvis større end null)
+            vertices.get(0).distance=0;                     // set distancen til null i første vertex
+        else    
+            return;
+        for(int i=0;i<vertices.size();i++) {                // add all vertices til min heap
+            Q.Insert(vertices.get(i));                      // found and got
+        }
+
         // The algorithm
-        int MST=0;
-        while(!Q.isEmpty()) {
-            Pair minVertexPair=Q.extractMin();
-            for(int i=0;i<AdjacencyGraph.length;i++){
-                if(AdjacencyGraph[minVertexPair.index][i]==1 && AdjacencyGraph[minVertexPair.index][i]<Distance[i])
+        int MST = 0;
+        while(!Q.isEmpty()) {                                   // run until empty
+            Vertex minVertex = Q.extractMin();                  // beder min heap om at give mindste og giver minVertex (tager også ud af minheap og rebalancere sig selv)
+            VertexInMST.add(minVertex);                         // add'er til prim
+            MST += minVertex.distance;                          // add'er og regner total distancen
+            for (Edge outEdge: minVertex.OutEdges) {            // finder outedges og iterere dem
+                if(!VertexInMST.contains(outEdge.to)  && outEdge.weight < outEdge.to.distance)  // tjekker om det allerede er taget, && tjekker om en af dem er mindre end distancen
                 {
-                        Distance[i] = AdjacencyGraph[minVertexPair.index][i];
-                        Predecessor[i]=minVertexPair.index;
-                        int pos = Q.getPosition(VertexPairs.get(i));
-                        VertexPairs.get(i).distance=AdjacencyGraph[minVertexPair.index][i];
-                        Q.decreasekey(pos);
+                    outEdge.to.distance = outEdge.weight;       // updatere distancen i edges
+                    outEdge.to.prev = minVertex;                // sætter den sidste som minVertex
+                    int pos = Q.getPosition(outEdge.to);        // spørger minheap hvor er den nye vertex vi vil opdatere
+                    Q.decreasekey(pos);                         // updates min heap
                 }
             }
-            MST+=Distance[minVertexPair.index];
         }
         System.out.println("Minimum spanning tree distance: " +MST);
-            for(i;i<AdjacencyGraph.length;i++)
-            {
-                System.out.println(" parent "+ Predecessor[i] + " to " + i +" EdgeWeight: "+ Distance[i]);
-            }
+        for(int i = 1; i< VertexInMST.size(); i++)
+        {
+            System.out.println(" parent "+ VertexInMST.get(i).prev.name + " to " + VertexInMST.get(i).name +" EdgeWeight: "+ VertexInMST.get(i).distance);
+        }
     }
     public  void PrintGraph(){
-        for (Vertex vertex : vertices) {
+        for (Vertex vertex : vertices) {                        // enhanced for loop, 
             System.out.println(" From: " + vertex.name);
             for (int j = 0; j < vertex.OutEdges.size(); j++) {
                 Edge currentEdge = vertex.OutEdges.get(j);
@@ -69,8 +66,8 @@ public class AdjacencyGraph {
 class Vertex implements Comparable<Vertex>{
     String name;
     ArrayList<Edge> OutEdges;
-    Integer dist= Integer.MAX_VALUE;
-    Vertex prev = null;                     // Added null
+    Integer distance = Integer.MAX_VALUE;       // ved ikke hvad vertex value er så sætter det til max_value
+    Vertex prev = null;                         // når fundet korteste rute bliver prev vertex null
     public Vertex(String id){
         name=id;
         OutEdges=new ArrayList<Edge>();
@@ -80,7 +77,7 @@ class Vertex implements Comparable<Vertex>{
     }
     @Override
     public int compareTo(Vertex o) {
-        return this.dist.compareTo(o.dist);
+        return this.distance.compareTo(o.distance);
     }
 }
 class Edge{
@@ -92,18 +89,5 @@ class Edge{
         this.to=to;
         this.weight=cost;
         this.from.addOutEdge(this);
-    }
-}
-// This class ties the distance with index so they can be compared
-class Pair implements Comparable<Pair> {
-   Integer distance;
-   Integer index;
-   public Pair(Integer distance, Integer index) {
-       this.distance=distance;
-       this.index=index;
-   }
-    @Override
-    public int compareTo(Pair p) {
-        return this.distance.compareTo(p.distance);
     }
 }
